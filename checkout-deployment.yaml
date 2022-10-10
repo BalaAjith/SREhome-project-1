@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+  namespace: default
+  labels:
+    app: checkout
+spec:
+  replicas: 1
+  selector:
+      matchLabels:
+        app: checkout
+  template:
+    metadata:
+      labels:
+        app: checkout
+    spec:
+      containers:
+      - name: checkout
+        image: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+            - name: nginx-index-file
+              mountPath: /usr/share/nginx/html/
+      volumes:
+      - name: nginx-index-file
+        configMap:
+          name: index-html-configmap-checkout
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout
+  namespace: default
+spec:
+  selector:
+    app: checkout
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: index-html-configmap-checkout
+  namespace: default
+data:
+  index.html: |
+    <html>
+    <h1>Service name: Checkout </h1>
+    </html
